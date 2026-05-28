@@ -54,7 +54,29 @@ source /usr/local/Ascend/nnal/atb/set_env.sh
 - **Atlas 900 A2 PODc** → 使用 `roll:ascend-a2`（`ascend910b1`）
 - **Atlas 900 A3 PODc** → 使用 `roll:ascend-a3`（`ascend910_9391`）
 
-当前仓库不包含 `Dockerfile.A2` 或 `Dockerfile.A3`。如果维护自定义镜像，请确保 SOC 版本与目标硬件匹配。
+当前仓库包含用于构建自定义镜像的 `docker/Dockerfile.A2` 和 `docker/Dockerfile.A3`。如果维护自定义镜像，请确保 SOC 版本与目标硬件匹配。
+
+### 禁用 FRACTAL_NZ模式
+
+**现象：** 在强化学习中开启NZ优化模式很有可能导致精度问题，vllm_ascend中存在该校验，若开启会出现 `ValueError: FRACTAL_NZ mode is enabled. This may cause model parameter precision issues in the RL scenarios.`错误
+
+**解决方案：** 启动脚本前，添加环境变量，禁用NZ：
+   ```bash
+   export VLLM_ASCEND_ENABLE_NZ=0
+   ```
+
+### HCCL参数面端口绑定失败
+
+**现象：** 当前rank或进程在通信算子参数面建链时绑定device侧网卡端口失败，端口被占用，出现 `The IP address XXXX and port XXXX have already been bound`错误
+
+**解决方案：** 
+
+1. HCCL使用device侧网卡的端口时默认需绑定16666端口，因此若有多个进程执行在同一个device上，且均会调用HCCL的通信算子接口，那么就会出现端口已被其他进程绑定导致失败的问题。
+2. 此时可先从业务上排查多个进程跑在同一个device上是否符合任务预期，若符合任务预期结果，可通过配置HCCL_NPU_SOCKET_PORT_RANGE环境变量使能多进程场景，如：
+   ```bash
+   export HCCL_NPU_SOCKET_PORT_RANGE="auto"
+   ```
+
 
 ## 依赖冲突
 

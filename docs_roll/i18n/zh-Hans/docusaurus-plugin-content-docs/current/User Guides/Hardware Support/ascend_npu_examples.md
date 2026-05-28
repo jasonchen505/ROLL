@@ -9,10 +9,11 @@
 运行本样例前，请确保：
 
 1. 已拉取与硬件匹配的预构建昇腾镜像（参见 [Docker 使用指南](ascend_docker_usage.md)）。
-2. 已在容器内验证环境（参见 [验证环境](ascend_docker_usage.md#verify-the-environment)）。
+2. 已在容器内验证环境（参见 [验证环境](ascend_docker_usage.md#验证环境)）。
 3. 已将模型权重下载到容器可访问的目录。
 
-当前仓库在 `examples/ascend_examples` 中提供可直接运行的昇腾示例，包括 `qwen3_8b_rlvr_deepspeed.yaml`、`qwen3_4B_dpo_deepspeed.yaml`、`run_rlvr_pipeline.sh` 和 `run_dpo_pipeline.sh`。
+当前仓库在 `examples/ascend_examples` 中提供可直接运行的昇腾 RLVR 示例，包括 `qwen3_8b_rlvr_deepspeed.yaml` 和 `run_rlvr_pipeline.sh`。
+
 
 ## GPU 与 NPU 的关键差异
 

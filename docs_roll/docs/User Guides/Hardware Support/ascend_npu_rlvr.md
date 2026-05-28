@@ -40,7 +40,7 @@ docker pull roll-registry.cn-hangzhou.cr.aliyuncs.com/roll/pytorch:cann851-a3-py
 docker tag roll-registry.cn-hangzhou.cr.aliyuncs.com/roll/pytorch:cann851-a3-py311-torch280-vllm0130 roll:ascend-a3
 ```
 
-The current repository does not include `Dockerfile.A2` or `Dockerfile.A3`. If you maintain a custom image, keep the dependency versions aligned with the pre-built image.
+The current repository includes `docker/Dockerfile.A2` and `docker/Dockerfile.A3` for building custom images. If you maintain a custom image, keep the dependency versions aligned with the pre-built image.
 
 ### 1.3 Start the Container
 

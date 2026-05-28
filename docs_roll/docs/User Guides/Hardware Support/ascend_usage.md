@@ -126,8 +126,7 @@ python examples/start_agentic_pipeline.py \
 | --------------- | ------------------------------------------------------------ | ---------------- | ----------------- | ----------------- |
 | Agentic         | examples/qwen2.5-0.5B-agentic/run_agentic_pipeline_sokoban.sh | DeepSpeed        | vLLM              | Atlas 900 A3 PODc |
 | Agentic-Rollout | examples/qwen2.5-0.5B-agentic/run_agentic_rollout_sokoban.sh | DeepSpeed        | vLLM              | Atlas 900 A3 PODc |
-| DPO             | examples/qwen2.5-3B-dpo_megatron/run_dpo_pipeline.sh         | DeepSpeed        | vLLM              | Atlas 900 A3 PODc |
-| RLVR            | examples/qwen2.5-7B-rlvr_megatron/run_rlvr_pipeline.sh       | DeepSpeed        | vLLM              | Atlas 900 A3 PODc |
+| RLVR            | examples/ascend_examples/run_rlvr_pipeline.sh                | DeepSpeed        | vLLM              | Atlas 900 A2/A3 PODc |
 
 ## Disclaimer
 

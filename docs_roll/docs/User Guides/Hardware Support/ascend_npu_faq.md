@@ -54,7 +54,29 @@ These commands are automatically added to `/root/.bashrc` during the Docker imag
 - **Atlas 900 A2 PODc** → Use `roll:ascend-a2` (`ascend910b1`)
 - **Atlas 900 A3 PODc** → Use `roll:ascend-a3` (`ascend910_9391`)
 
-The current repository does not include `Dockerfile.A2` or `Dockerfile.A3`. If you maintain a custom image, ensure its SOC version matches the target hardware.
+The current repository includes `docker/Dockerfile.A2` and `docker/Dockerfile.A3` for building custom images. If you maintain a custom image, ensure its SOC version matches the target hardware.
+
+### Disable FRACTAL_NZ Mode
+
+**Symptom:** Enabling NZ optimization mode during reinforcement learning is likely to cause precision issues. vLLM-Ascend includes a check for this, and if NZ mode is enabled, it may raise the following error: `ValueError: FRACTAL_NZ mode is enabled. This may cause model parameter precision issues in the RL scenarios.`
+
+**Solution:** Before running the startup script, add the following environment variable to disable NZ mode:
+
+```bash
+export VLLM_ASCEND_ENABLE_NZ=0
+```
+
+### HCCL Parameter Plane Port Binding Failure
+
+**Symptom:** When the current rank or process establishes a communication operator on the parameter plane, binding the device-side NIC port fails because the port is already occupied. The error may look like: `The IP address XXXX and port XXXX have already been bound`.
+
+**Solution:**
+
+1. HCCL uses the device-side NIC port and binds to port 16666 by default. Therefore, if multiple processes run on the same device and all call HCCL communication operator APIs, the port may already be bound by another process, causing the failure.
+2. First check whether running multiple processes on the same device is expected for your workload. If it is expected, enable multi-process scenarios by configuring the `HCCL_NPU_SOCKET_PORT_RANGE` environment variable, for example:
+   ```bash
+   export HCCL_NPU_SOCKET_PORT_RANGE="auto"
+   ```
 
 ## Dependency Conflicts
 

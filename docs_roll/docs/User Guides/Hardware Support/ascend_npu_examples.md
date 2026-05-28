@@ -12,7 +12,7 @@ Before running these examples, ensure you have:
 2. Verified the environment inside the container (see [Verify the Environment](ascend_docker_usage.md#verify-the-environment)).
 3. Downloaded the model weights to a directory accessible from inside the container.
 
-The repository currently includes runnable Ascend examples in `examples/ascend_examples`, including `qwen3_8b_rlvr_deepspeed.yaml`, `qwen3_4B_dpo_deepspeed.yaml`, `run_rlvr_pipeline.sh`, and `run_dpo_pipeline.sh`.
+The repository currently includes a runnable Ascend RLVR example in `examples/ascend_examples`, including `qwen3_8b_rlvr_deepspeed.yaml` and `run_rlvr_pipeline.sh`.
 
 ## Key Differences from GPU
 
