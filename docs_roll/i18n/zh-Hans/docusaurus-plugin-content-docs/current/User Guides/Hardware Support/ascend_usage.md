@@ -1,6 +1,6 @@
 # ROLL x Ascend
 
-最后更新：2026/06/23。
+最后更新：2026/08/17。
 
 我们在 ROLL 上增加对华为昇腾设备的支持。
 
@@ -10,21 +10,21 @@ ROLL 昇腾适配当前覆盖以下训练系列硬件：
 
 | 产品 | 是否支持 | 说明 |
 | ---- | -------- | ---- |
-| Atlas 900 A2 PODc（Ascend 910B1）/ Atlas A2 训练系列产品 | √ | 使用 `docker/Dockerfile.A2` 或 `roll:ascend-a2` 镜像。 |
-| Atlas 900 A3 PODc（Ascend 910_9391）/ Atlas A3 训练系列产品 | √ | 使用 `docker/Dockerfile.A3` 或 `roll:ascend-a3` 镜像。 |
-| Atlas A5 训练系列产品 | √ | 使用 A5 安装配置：torch 2.10、vLLM v0.20.2、vLLM-Ascend `main`，并在构建 vLLM-Ascend 时设置 `COMPILE_CUSTOM_KERNELS=1`。 |
+| Atlas 900 A2 PODc（Ascend 910B1）/ Atlas A2 训练系列产品 | √ | 使用 `docker/Dockerfile.A2` 或 `roll:v0.3-cann9.1.0-torch_npu2.10.0.post4-910b-ubuntu22.04-py3.12` 镜像。 |
+| Atlas 900 A3 PODc（Ascend 910_9391）/ Atlas A3 训练系列产品 | √ | 使用 `docker/Dockerfile.A3` 或 `roll:v0.3-cann9.1.0-torch_npu2.10.0.post4-a3-ubuntu22.04-py3.12` 镜像。 |
+| Ascend 950 训练系列产品 | √ | 使用 Ascend 950 安装配置：torch 2.10、vLLM v0.20.2、vLLM-Ascend `main`，并在构建 vLLM-Ascend 时设置 `COMPILE_CUSTOM_KERNELS=1`。 |
 | Atlas A2/A3 推理系列产品、Atlas 200I/500 A2 推理产品 | x | 当前 ROLL NPU 镜像和示例面向训练系列设备。 |
 | 其他昇腾训练或推理产品 | 未验证 | 使用前请确认驱动、固件、CANN、`torch_npu` 与 vLLM-Ascend 版本配套。 |
 
-> 本节表格中 `√` 代表当前 ROLL 昇腾 Dockerfile、示例或 A5 手动安装配置已支持，`x` 代表当前 ROLL NPU 配套不支持。
+> 本节表格中 `√` 代表当前 ROLL 昇腾 Dockerfile、示例或 Ascend 950 手动安装配置已支持，`x` 代表当前 ROLL NPU 配套不支持。
 
 支持的操作系统：
 
 | 部署场景 | 支持的操作系统 | 说明 |
 | -------- | -------------- | ---- |
 | 物理机宿主机 | Ubuntu 22.04 | 当前 ROLL 昇腾文档推荐并验证的宿主机操作系统。 |
-| ROLL 昇腾容器 | Ubuntu 22.04 | A2/A3 Dockerfile 基于 `quay.io/ascend/cann:9.0.0-*-ubuntu22.04-py3.11`。 |
-| Atlas A5 手动安装 | Ubuntu 22.04 | 使用下文 A5 专用 torch/vLLM 版本组合。驱动、固件、CANN 和 `torch_npu` 版本需要与目标 A5 环境匹配。 |
+| ROLL 昇腾容器 | Ubuntu 22.04 | A2/A3 Dockerfile 基于 `quay.io/ascend/cann:9.1.0-*-ubuntu22.04-py3.12-devel`。 |
+| Ascend 950  手动安装 | Ubuntu 22.04 | 使用下文 Ascend 950 专用 torch/vLLM 版本组合。驱动、固件、CANN 和 `torch_npu` 版本需要与目标 Ascend 950 环境匹配。 |
 | 其他宿主机 OS 上的虚拟机或容器部署 | 以昇腾/CANN 兼容性说明为准 | 请结合目标硬件查询昇腾兼容性查询助手，以及 CANN 软件安装文档中的操作系统兼容性说明。 |
 
 ## 安装
@@ -33,17 +33,17 @@ ROLL 昇腾适配当前覆盖以下训练系列硬件：
 
 | 软件 | 版本 |
 |-----------|-------------|
-| Python    |  3.11       |
-| CANN      |  9.0.0      |
+| Python    |  3.12       |
+| CANN      |  9.1.0      |
 
-Atlas A5 请保持 Python 3.11，并使用下文 [A5 安装配置](#a5-安装配置) 中的专用 torch/vLLM 版本组合。
+Ascend 950 请保持 Python 3.11，并使用下文 [Ascend 950 安装配置](#Ascend 950-安装配置) 中的专用 torch/vLLM 版本组合。
 
 ### 创建 conda 环境
 
 使用以下命令在 Miniconda 中创建新的 conda 环境：
 
 ```
-conda create --name roll python=3.11
+conda create --name roll python=3.12
 conda activate roll
 ```
 
@@ -53,10 +53,15 @@ conda activate roll
 
 ```
 # 在预构建镜像外手动安装时，使用 CPU 版 torch
-pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cpu
+pip install \
+    --index-url https://download.pytorch.org/whl/cpu \
+    --extra-index-url https://mirrors.huaweicloud.com/repository/pypi/simple \
+    torch==2.10.0+cpu torchvision==0.25.0 torchaudio==2.10.0
 
 # 安装与 torch/CANN 匹配的 torch_npu
-pip install torch_npu==2.9.0
+python -m pip install \
+    --extra-index-url https://mirrors.huaweicloud.com/ascend/repos/pypi \
+    --no-deps torch-npu==2.10.0.post4
 ```
 
 ### 安装 vllm & vllm-ascend
@@ -65,34 +70,39 @@ pip install torch_npu==2.9.0
 
 ```
 # vllm
-git clone -b v0.18.0 --depth 1 https://github.com/vllm-project/vllm.git
+git clone -b v0.23.0 --depth 1 https://github.com/vllm-project/vllm.git
 cd vllm
-pip install -r requirements/build.txt
 
 VLLM_TARGET_DEVICE=empty pip install -v -e .
 cd ..
 
 # vllm-ascend
-git clone -b v0.18.0 --depth 1 https://github.com/vllm-project/vllm-ascend.git
+git clone -b v0.23.0rc1 --depth 1 https://github.com/vllm-project/vllm-ascend.git
 cd vllm-ascend
+git submodule update --init --recursive
 
-pip install -e .
+pip install -e . --no-build-isolation --extra-index-url https://mirrors.huaweicloud.com/ascend/repos/pypi
 cd ..
+
+# 在其他依赖安装完成后安装昇腾 Triton 实现
+pip install triton-ascend==3.2.1 --extra-index-url https://mirrors.huaweicloud.com/ascend/repos/pypi
 ```
 
 或者可以从预编译的 wheel 包安装 `vllm` 和 `vllm-ascend`：
 
 ```
-# 安装 vllm-project/vllm，最新支持版本为 v0.18.0
-pip install vllm==0.18.0
+# 安装 vllm-project/vllm，最新支持版本为 v0.23.0
+pip install vllm==0.23.0
 
 # 从 pypi 安装 vllm-project/vllm-ascend
-pip install vllm-ascend==0.18
+pip install \
+    --extra-index-url https://mirrors.huaweicloud.com/ascend/repos/pypi \
+    vllm-ascend==0.23.0rc1
 ```
 
-### A5 安装配置
+### Ascend 950 安装配置
 
-Atlas A5 上使用 torch 2.10、vLLM v0.20.2，并从 `main` 分支安装 vLLM-Ascend。安装 vLLM-Ascend 前需要设置 `COMPILE_CUSTOM_KERNELS=1`，以便编译自定义 kernel：
+Ascend 950上使用 torch 2.10、vLLM v0.20.2，并从 `main` 分支安装 vLLM-Ascend。安装 vLLM-Ascend 前需要设置 `COMPILE_CUSTOM_KERNELS=1`，以便编译自定义 kernel：
 
 ```
 # 安装 torch 2.10
@@ -131,6 +141,8 @@ cd ..
 | 软件 | 说明 |
 | ---- | ---- |
 | transformers | >= v4.57.6 |
+| torch-npu | 2.10.0.post4 |
+| triton-ascend | 3.2.1（替代 `triton`） |
 | flash_attn | 不支持 |
 | transformer-engine[pytorch] | 不支持 |
 
@@ -140,6 +152,8 @@ cd ..
 
 ```
 pip install transformers==4.57.6
+pip uninstall -y triton triton-ascend
+pip install triton-ascend==3.2.1 --extra-index-url https://mirrors.huaweicloud.com/ascend/repos/pypi
 ```
 
 ## 快速开始：单节点部署指引
@@ -171,9 +185,9 @@ python examples/start_agentic_pipeline.py \
 
 | 功能 | 示例 | 训练后端 | 推理后端 | 硬件 |
 | ---- | ---- | -------- | -------- | ---- |
-| Agentic | examples/qwen2.5-0.5B-agentic/run_agentic_pipeline_sokoban.sh | FSDP2 | vLLM | Atlas 900 A2/A3 PODc |
-| Agentic-Rollout | examples/qwen2.5-0.5B-agentic/run_agentic_rollout_sokoban.sh | FSDP2 | vLLM | Atlas 900 A2/A3 PODc |
-| RLVR | examples/ascend_examples/run_rlvr_pipeline.sh | FSDP2 | vLLM | Atlas 900 A2/A3/A5 训练系列 |
+| Agentic | examples/qwen2.5-0.5B-agentic/run_agentic_pipeline_sokoban.sh | FSDP2 | vLLM | Atlas 900 A2/A3/Ascend 950 训练系列 |
+| Agentic-Rollout | examples/qwen2.5-0.5B-agentic/run_agentic_rollout_sokoban.sh | FSDP2 | vLLM | Atlas 900 A2/A3/Ascend 950 训练系列 |
+| RLVR | examples/ascend_examples/run_rlvr_pipeline.sh | FSDP2 | vLLM | Atlas 900 A2/A3/Ascend 950 训练系列 |
 
 ## 声明
 
